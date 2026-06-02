@@ -1,5 +1,5 @@
 ﻿<!-- HEADER ANIMADO -->
-<h1>Nesse repositório voce vai aprender de tudo  github</h1>
+<h1>Nesse repositório voce vai aprender de tudo sobre github</h1>
 
 <img width="1401" height="933" alt="Image" src="https://github.com/user-attachments/assets/a7759355-6fe3-407c-b1ab-d7bb32dd2bdf" />
 
