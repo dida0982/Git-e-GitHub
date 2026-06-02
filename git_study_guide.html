@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia Git</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;
+    --border:#30363d;--border2:#484f58;
+    --text:#e6edf3;--text2:#8b949e;--text3:#6e7681;
+    --green:#3fb950;--green2:#238636;--green3:#0d4429;
+    --orange:#f0883e;--blue:#58a6ff;--purple:#bc8cff;
+    --pink:#ff7b72;--teal:#39d353;
+    --r8:8px;--r12:12px;--r16:16px;
+  }
+  body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+  
+  .hero{
+    background:linear-gradient(135deg,#0d1117 0%,#161b22 50%,#0d2818 100%);
+    padding:60px 40px 50px;
+    border-bottom:1px solid var(--border);
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::before{
+    content:'';position:absolute;top:-100px;right:-100px;
+    width:400px;height:400px;
+    background:radial-gradient(circle,rgba(63,185,80,.08) 0%,transparent 70%);
+    pointer-events:none;
+  }
+  .hero-badge{
+    display:inline-flex;align-items:center;gap:6px;
+    background:var(--green3);border:1px solid var(--green2);
+    color:var(--green);font-size:11px;font-weight:600;letter-spacing:.8px;
+    text-transform:uppercase;padding:4px 10px;border-radius:20px;margin-bottom:20px;
+  }
+  .hero-badge::before{content:'';width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .hero h1{font-size:42px;font-weight:700;line-height:1.1;margin-bottom:12px;letter-spacing:-1px}
+  .hero h1 span{color:var(--green)}
+  .hero p{color:var(--text2);font-size:16px;font-weight:300;max-width:480px}
+  .hero-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}
+  .tag{background:var(--bg3);border:1px solid var(--border);color:var(--text2);
+    font-size:12px;padding:4px 10px;border-radius:20px;font-family:'JetBrains Mono',monospace}
+
+  nav{
+    display:flex;gap:0;border-bottom:1px solid var(--border);
+    background:var(--bg2);padding:0 40px;overflow-x:auto;
+    position:sticky;top:0;z-index:100;
+  }
+  .nav-btn{
+    background:none;border:none;color:var(--text2);font-family:'Sora',sans-serif;
+    font-size:13px;font-weight:400;padding:14px 16px;cursor:pointer;
+    border-bottom:2px solid transparent;white-space:nowrap;transition:.15s;
+  }
+  .nav-btn:hover{color:var(--text)}
+  .nav-btn.active{color:var(--green);border-bottom-color:var(--green);font-weight:600}
+
+  main{padding:40px;max-width:900px;margin:0 auto}
+
+  .section{display:none;animation:fadeIn .25s ease}
+  .section.active{display:block}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+  h2{font-size:22px;font-weight:600;margin-bottom:8px;color:var(--text)}
+  .section-desc{color:var(--text2);font-size:14px;margin-bottom:28px;line-height:1.6}
+
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r12);padding:20px 24px;margin-bottom:16px}
+  .card-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .card-icon{font-size:18px;width:34px;height:34px;background:var(--bg3);border-radius:var(--r8);
+    display:flex;align-items:center;justify-content:center;border:1px solid var(--border)}
+  .card-title{font-size:15px;font-weight:600}
+  .card-subtitle{font-size:12px;color:var(--text3);margin-top:2px}
+
+  code, .code-block{font-family:'JetBrains Mono',monospace}
+  .code-block{
+    background:var(--bg);border:1px solid var(--border);border-radius:var(--r8);
+    padding:14px 16px;font-size:12.5px;line-height:1.8;overflow-x:auto;
+    position:relative;
+  }
+  .code-block .comment{color:#5c6370;font-style:italic}
+  .code-block .cmd{color:var(--blue)}
+  .code-block .arg{color:var(--orange)}
+  .code-block .str{color:var(--green)}
+  .code-block .flag{color:var(--purple)}
+
+  .copy-btn{
+    position:absolute;top:10px;right:10px;background:var(--bg3);
+    border:1px solid var(--border);color:var(--text3);font-size:11px;
+    font-family:'Sora',sans-serif;padding:3px 8px;border-radius:6px;cursor:pointer;transition:.15s;
+  }
+  .copy-btn:hover{color:var(--text);border-color:var(--border2)}
+  .copy-btn.copied{color:var(--green);border-color:var(--green2)}
+
+  .concept{border-left:3px solid var(--green);padding:12px 16px;background:rgba(63,185,80,.04);border-radius:0 var(--r8) var(--r8) 0;margin:12px 0;font-size:13.5px;line-height:1.7;color:var(--text2)}
+  .concept strong{color:var(--text)}
+
+  .warning{border-left:3px solid var(--orange);padding:12px 16px;background:rgba(240,136,62,.04);border-radius:0 var(--r8) var(--r8) 0;margin:12px 0;font-size:13.5px;line-height:1.7;color:var(--text2)}
+  .warning strong{color:var(--orange)}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:600px){.grid2{grid-template-columns:1fr}}
+
+  .flow{display:flex;align-items:center;gap:0;margin:16px 0;flex-wrap:wrap}
+  .flow-step{
+    background:var(--bg3);border:1px solid var(--border);
+    padding:8px 14px;font-size:12px;font-weight:600;
+    display:flex;align-items:center;gap:6px;
+  }
+  .flow-step:first-child{border-radius:var(--r8) 0 0 var(--r8)}
+  .flow-step:last-child{border-radius:0 var(--r8) var(--r8) 0}
+  .flow-arrow{color:var(--border2);font-size:16px;padding:0 2px}
+  .flow-step.highlight{background:rgba(63,185,80,.1);border-color:var(--green2);color:var(--green)}
+
+  .pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace}
+  .pill-green{background:var(--green3);color:var(--green);border:1px solid var(--green2)}
+  .pill-orange{background:rgba(240,136,62,.1);color:var(--orange);border:1px solid rgba(240,136,62,.3)}
+  .pill-blue{background:rgba(88,166,255,.08);color:var(--blue);border:1px solid rgba(88,166,255,.2)}
+  .pill-red{background:rgba(255,123,114,.08);color:var(--pink);border:1px solid rgba(255,123,114,.2)}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+  th{text-align:left;color:var(--text3);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.6px;padding:8px 12px;border-bottom:1px solid var(--border)}
+  td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top}
+  td:first-child{font-family:'JetBrains Mono',monospace;color:var(--blue);white-space:nowrap}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:rgba(255,255,255,.02)}
+
+  .diagram{background:var(--bg);border:1px solid var(--border);border-radius:var(--r8);padding:16px;margin:12px 0;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.9;color:var(--text2);overflow-x:auto}
+  .diagram .branch-main{color:var(--green)}
+  .diagram .branch-feat{color:var(--blue)}
+  .diagram .commit{color:var(--purple)}
+  .diagram .tag{color:var(--orange)}
+  .diagram .label{color:var(--text3)}
+
+  .stash-stack{display:flex;flex-direction:column;gap:0;margin:12px 0;max-width:340px}
+  .stash-item{
+    padding:10px 14px;border:1px solid var(--border);font-size:12px;font-family:'JetBrains Mono',monospace;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .stash-item:first-child{border-radius:var(--r8) var(--r8) 0 0;background:rgba(63,185,80,.05);border-color:var(--green2)}
+  .stash-item:last-child{border-radius:0 0 var(--r8) var(--r8)}
+  .stash-item .idx{color:var(--text3);font-size:11px}
+  .stash-item .msg{color:var(--text)}
+  .stash-item.top .msg{color:var(--green)}
+  .stash-top-label{font-size:11px;color:var(--green);margin-bottom:4px;font-family:'JetBrains Mono',monospace}
+
+  .resource-link{
+    display:flex;align-items:center;gap:10px;padding:12px 14px;
+    background:var(--bg3);border:1px solid var(--border);border-radius:var(--r8);
+    text-decoration:none;color:var(--text);transition:.15s;margin-bottom:8px;
+  }
+  .resource-link:hover{border-color:var(--border2);background:var(--bg2)}
+  .resource-link .link-icon{color:var(--blue);font-size:16px}
+  .resource-link .link-text{flex:1;font-size:13.5px}
+  .resource-link .link-sub{font-size:11px;color:var(--text3)}
+  .resource-link .arrow{color:var(--text3);font-size:13px}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">📚 Alura · Git & GitHub</div>
+  <h1>Guia <span>Git</span><br>Completo</h1>
+  <p>Resumo completo do curso — do fluxo básico ao cherry-pick e blame.</p>
+  <div class="hero-tags">
+    <span class="tag">branches</span>
+    <span class="tag">restore</span>
+    <span class="tag">stash</span>
+    <span class="tag">tags</span>
+    <span class="tag">cherry-pick</span>
+    <span class="tag">blame</span>
+    <span class="tag">releases</span>
+  </div>
+</div>
+
+<nav>
+  <button class="nav-btn active" onclick="show('basico',this)">🔄 Fluxo Básico</button>
+  <button class="nav-btn" onclick="show('branches',this)">🌿 Branches</button>
+  <button class="nav-btn" onclick="show('restore',this)">⏪ Restore & Stash</button>
+  <button class="nav-btn" onclick="show('tags',this)">🏷️ Tags & Releases</button>
+  <button class="nav-btn" onclick="show('avancado',this)">🍒 Cherry-pick & Blame</button>
+  <button class="nav-btn" onclick="show('referencia',this)">📋 Referência</button>
+</nav>
+
+<main>
+
+<!-- FLUXO BÁSICO -->
+<div id="basico" class="section active">
+  <h2>Fluxo Básico de Trabalho</h2>
+  <p class="section-desc">O ciclo que você vai repetir todo dia. Memorize essa sequência de 4 passos.</p>
+
+  <div class="flow">
+    <div class="flow-step">📁 Editar arquivo</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step highlight">git add</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step highlight">git commit</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step highlight">git push</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">⚡</div>
+      <div><div class="card-title">Ciclo completo</div><div class="card-subtitle">Use toda vez que fizer alterações</div></div>
+    </div>
+    <div class="code-block" id="cb1">
+<button class="copy-btn" onclick="copyCode('cb1',this)">copiar</button>
+<span class="comment"># 1. Ver o que foi modificado</span>
+<span class="cmd">git status</span>
+
+<span class="comment"># 2. Adicionar tudo ao stage</span>
+<span class="cmd">git add</span> <span class="arg">.</span>
+
+<span class="comment"># 3. Registrar com mensagem</span>
+<span class="cmd">git commit</span> <span class="flag">-m</span> <span class="str">"sua mensagem aqui"</span>
+
+<span class="comment"># 4. Enviar para o GitHub</span>
+<span class="cmd">git push origin main</span></div>
+    <div class="concept">💡 <strong>git add .</strong> adiciona todos os arquivos de uma vez. Para adicionar só um: <code>git add nome-do-arquivo.html</code></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🔍</div>
+        <div><div class="card-title">Visualizando histórico</div></div>
+      </div>
+      <div class="code-block" id="cb2">
+<button class="copy-btn" onclick="copyCode('cb2',this)">copiar</button>
+<span class="comment"># Histórico completo</span>
+<span class="cmd">git log</span>
+
+<span class="comment"># Resumido (mais usado) ⭐</span>
+<span class="cmd">git log</span> <span class="flag">--oneline</span>
+
+<span class="comment"># Com alterações detalhadas</span>
+<span class="cmd">git log</span> <span class="flag">-p</span>
+
+<span class="comment"># Com gráfico de branches</span>
+<span class="cmd">git log</span> <span class="flag">--graph</span></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🔎</div>
+        <div><div class="card-title">Comparando e inspecionando</div></div>
+      </div>
+      <div class="code-block" id="cb3">
+<button class="copy-btn" onclick="copyCode('cb3',this)">copiar</button>
+<span class="comment"># Ver detalhes do último commit</span>
+<span class="cmd">git show</span>
+
+<span class="comment"># Ver commit específico</span>
+<span class="cmd">git show</span> <span class="arg">2ad48c0</span>
+
+<span class="comment"># O que mudou (não adicionado)</span>
+<span class="cmd">git diff</span>
+
+<span class="comment"># Comparar dois commits</span>
+<span class="cmd">git diff</span> <span class="arg">abc..def</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon">📖</div><div><div class="card-title">Conceitos essenciais</div></div></div>
+    <table>
+      <tr><th>Termo</th><th>Significado</th></tr>
+      <tr><td>HEAD</td><td>Apelido para o commit mais recente da branch atual</td></tr>
+      <tr><td>Stage (index)</td><td>Área intermediária — arquivos prontos para o commit</td></tr>
+      <tr><td>Hash</td><td>Identificador único de cada commit (ex: <code>237cada</code>)</td></tr>
+      <tr><td>diff</td><td>Formato de diferenças: <code>-</code> = removido, <code>+</code> = adicionado</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- BRANCHES -->
+<div id="branches" class="section">
+  <h2>Branches — Linhas do Tempo Paralelas</h2>
+  <p class="section-desc">Branches permitem desenvolver funcionalidades sem afetar o código principal.</p>
+
+  <div class="diagram">
+<span class="branch-main">main:    A ── B ── C</span>
+                             <span class="label">\</span>
+<span class="branch-feat">feature:              D ── E</span>
+
+<span class="label">                              ↑ git switch -c feature</span></div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon">🌿</div><div><div class="card-title">Criando e navegando</div></div></div>
+    <div class="code-block" id="cb4">
+<button class="copy-btn" onclick="copyCode('cb4',this)">copiar</button>
+<span class="comment"># Listar todas as branches</span>
+<span class="cmd">git branch</span>
+
+<span class="comment"># Criar nova branch e entrar nela ⭐</span>
+<span class="cmd">git switch</span> <span class="flag">-c</span> <span class="arg">nome-da-branch</span>
+
+<span class="comment"># Entrar em branch existente</span>
+<span class="cmd">git switch</span> <span class="arg">nome-da-branch</span>
+
+<span class="comment"># Voltar para branch anterior (atalho)</span>
+<span class="cmd">git switch</span> <span class="arg">-</span>
+
+<span class="comment"># Deletar branch (após merge)</span>
+<span class="cmd">git branch</span> <span class="flag">-d</span> <span class="arg">nome-da-branch</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon">🔀</div><div><div class="card-title">git checkout — o "canivete suíço" dividido</div></div></div>
+    <div class="concept">A partir do Git 2.23, o <strong>git checkout</strong> foi dividido em dois comandos mais claros. Ele ainda funciona normalmente, mas os novos são preferidos.</div>
+    <table>
+      <tr><th>Objetivo</th><th>Comando antigo</th><th>Comando novo ⭐</th></tr>
+      <tr><td>Trocar de branch</td><td><code>git checkout feature</code></td><td><code>git switch feature</code></td></tr>
+      <tr><td>Criar e entrar</td><td><code>git checkout -b nova</code></td><td><code>git switch -c nova</code></td></tr>
+      <tr><td>Restaurar arquivo</td><td><code>git checkout -- arquivo</code></td><td><code>git restore arquivo</code></td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon">🧩</div><div><div class="card-title">Fluxo completo: do início ao merge</div></div></div>
+    <div class="code-block" id="cb5">
+<button class="copy-btn" onclick="copyCode('cb5',this)">copiar</button>
+<span class="comment"># 1. Criar e entrar na branch de feature</span>
+<span class="cmd">git switch</span> <span class="flag">-c</span> <span class="arg">feature/login</span>
+
+<span class="comment"># 2. Fazer alterações e commits</span>
+<span class="cmd">git add</span> <span class="arg">.</span>
+<span class="cmd">git commit</span> <span class="flag">-m</span> <span class="str">"Adiciona tela de login"</span>
+
+<span class="comment"># 3. Voltar para a main</span>
+<span class="cmd">git switch main</span>
+
+<span class="comment"># 4. Unir as mudanças</span>
+<span class="cmd">git merge</span> <span class="arg">feature/login</span>
+
+<span class="comment"># 5. Deletar a branch (agora mergeada)</span>
+<span class="cmd">git branch</span> <span class="flag">-d</span> <span class="arg">feature/login</span></div>
+  </div>
+
+  <div class="concept">🎮 <strong>Dica:</strong> Use o <a href="https://git-school.github.io/visualizing-git/" target="_blank" style="color:var(--blue)">Visualizing Git</a> para ver os branches se formando graficamente no navegador — sem instalar nada.</div>
+</div>
+
+<!-- RESTORE & STASH -->
+<div id="restore" class="section">
+  <h2>Restore & Stash — Desfazendo e Pausando</h2>
+  <p class="section-desc">Controle total sobre suas alterações antes do commit.</p>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon">🗺️</div><div><div class="card-title">Onde suas alterações estão</div></div></div>
+    <div class="flow">
+      <div class="flow-step">📁 Editar arquivo</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><span style="color:var(--pink)">Working Tree</span></div>
+      <div class="flow-arrow">→ git add →</div>
+      <div class="flow-step"><span style="color:var(--green)">Staging Area</span></div>
+      <div class="flow-arrow">→ git commit →</div>
+      <div class="flow-step"><span style="color:var(--blue)">💾 Commit</span></div>
+    </div>
+    <table>
+      <tr><th>Área</th><th>git status</th><th>Como desfazer</th></tr>
+      <tr><td>Working Tree</td><td><span class="pill pill-red">vermelho</span></td><td><code>git restore arquivo</code></td></tr>
+      <tr><td>Staging Area</td><td><span class="pill pill-green">verde</span></td><td><code>git restore --staged arquivo</code></td></tr>
+    </table>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-header"><div class="card-icon">⏪</div><div><div class="card-title">git restore</div></div></div>
+      <div class="code-block" id="cb6">
+<button class="copy-btn" onclick="copyCode('cb6',this)">copiar</button>
+<span class="comment"># Desfaz mudanças (1 arquivo)</span>
+<span class="cmd">git restore</span> <span class="arg">arquivo.txt</span>
+
+<span class="comment"># Desfaz tudo no projeto (Ctrl+Z total)</span>
+<span class="cmd">git restore</span> <span class="arg">.</span>
+
+<span class="comment"># Tira do stage (mantém mudanças)</span>
+<span class="cmd">git restore</span> <span class="flag">--staged</span> <span class="arg">arquivo.txt</span>
+
+<span class="comment"># Viagem no tempo para commit X</span>
+<span class="cmd">git restore</span> <span class="flag">--source=</span><span class="arg">abc1234</span> <span class="arg">arquivo</span></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-icon">🗄️</div><div><div class="card-title">git stash</div></div></div>
+      <div class="code-block" id="cb7">
+<button class="copy-btn" onclick="copyCode('cb7',this)">copiar</button>
+<span class="comment"># Guardar trabalho na "gaveta"</span>
+<span class="cmd">git stash push</span> <span class="flag">-m</span> <span class="str">"WIP: funcionalidade X"</span>
+
+<span class="comment"># Listar o que está guardado</span>
+<span class="cmd">git stash list</span>
+
+<span class="comment"># Recuperar e remover da gaveta</span>
+<span class="cmd">git stash pop</span>
+
+<span class="comment"># Aplicar sem remover</span>
+<span class="cmd">git stash apply</span> <span class="arg">1</span>
+
+<span class="comment"># Limpar tudo</span>
+<span class="cmd">git stash clear</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon">🥞</div><div><div class="card-title">Stash funciona como uma pilha</div><div class="card-subtitle">O último guardado é o primeiro a sair</div></div></div>
+    <div class="stash-top-label">↓ pop age aqui primeiro</div>
+    <div class="stash-stack">
+      <div class="stash-item top"><span class="msg">Removendo quebras de linha</span><span class="idx">stash@{0}</span></div>
+      <div class="stash-item"><span class="msg">Movendo chamada de função</span><span class="idx">stash@{1}</span></div>
+    </div>
+    <div class="concept" style="margin-top:12px">Para recuperar um item específico: <code>git stash pop 1</code> ou <code>git stash apply 1</code></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon">🚨</div><div><div class="card-title">Quando usar o quê?</div></div></div>
+    <table>
+      <tr><th>Situação</th><th>Comando</th></tr>
+      <tr><td>Quero <strong style="color:var(--pink)">apagar</strong> minhas mudanças definitivamente</td><td><code>git restore .</code></td></tr>
+      <tr><td>Quero <strong style="color:var(--green)">pausar</strong> e retomar depois</td><td><code>git stash</code></td></tr>
+      <tr><td>Fiz git add mas mudei de ideia</td><td><code>git restore --staged arquivo</code></td></tr>
+      <tr><td>Ver como arquivo era em commit antigo</td><td><code>git restore --source=HASH arquivo</code></td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- TAGS & RELEASES -->
+<div id="tags" class="section">
+  <h2>Tags & Releases — Versionando o Projeto</h2>
+  <p class="section-desc">Marque pontos específicos do histórico como versões oficiais do seu projeto.</p>
+
+  <div class="diagram">
+commits: A ── B ── C ── D ── E
+              <span class="tag">↑</span>               <span class="tag">↑</span>
+         <span class="tag">tag: v0.1.0</span>     <span class="tag">tag: v0.1.1</span>
+         <span class="label">(save point!)</span>   <span class="label">(save point!)</span>
+
+<span class="label">→ A tag NUNCA se move. Aponta para o mesmo commit para sempre.</span></div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-header"><div class="card-icon">🔖</div><div><div class="card-title">Tag simples</div><div class="card-subtitle">Só um apelido para o commit</div></div></div>
+      <div class="code-block" id="cb8">
+<button class="copy-btn" onclick="copyCode('cb8',this)">copiar</button>
+<span class="comment"># Cria na HEAD (commit atual)</span>
+<span class="cmd">git tag</span> <span class="arg">v0.1.0</span>
+
+<span class="comment"># Cria em commit específico</span>
+<span class="cmd">git tag</span> <span class="arg">v0.1.0</span> <span class="arg">502afb6</span>
+
+<span class="comment"># Listar todas as tags</span>
+<span class="cmd">git tag</span>
+
+<span class="comment"># Apagar tag localmente</span>
+<span class="cmd">git tag</span> <span class="flag">-d</span> <span class="arg">v0.1.0</span></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-icon">📝</div><div><div class="card-title">Annotated Tag</div><div class="card-subtitle">Tag com mensagem, autor e data</div></div></div>
+      <div class="code-block" id="cb9">
+<button class="copy-btn" onclick="copyCode('cb9',this)">copiar</button>
+<span class="comment"># Cria annotated tag com mensagem</span>
+<span class="cmd">git tag</span> <span class="flag">-a</span> <span class="arg">v0.1.1</span> <span class="flag">-m</span> <span class="str">"Versão 0.1.1"</span>
+
+<span class="comment"># O -a é opcional com -m</span>
+<span class="cmd">git tag</span> <span class="arg">v0.1.1</span> <span class="flag">-m</span> <span class="str">"Versão 0.1.1"</span>
+
+<span class="comment"># Inspecionar annotated tag</span>
+<span class="cmd">git tag</span> <span class="flag">-v</span> <span class="arg">v0.1.1</span>
+
+<span class="comment"># Enviar todas as tags</span>
+<span class="cmd">git push origin</span> <span class="flag">--tags</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon">🚀</div><div><div class="card-title">Tag simples vs Annotated</div></div></div>
+    <table>
+      <tr><th></th><th>Tag Simples</th><th>Annotated Tag</th></tr>
+      <tr><td>Aponta para commit</td><td>✅</td><td>✅</td></tr>
+      <tr><td>Mensagem própria</td><td>❌</td><td>✅</td></tr>
+      <tr><td>Guarda autor e data</td><td>❌</td><td>✅</td></tr>
+      <tr><td>Verificável com -v</td><td>❌</td><td>✅</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon">📦</div><div><div class="card-title">Releases no GitHub</div><div class="card-subtitle">Publicação oficial de uma versão</div></div></div>
+    <div class="concept">Uma <strong>release</strong> é construída a partir de uma tag. Permite adicionar changelog, descrição da versão e arquivos para download (como um .exe compilado).</div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--r8);padding:14px 16px;font-size:12.5px;font-family:'JetBrains Mono',monospace;line-height:2;margin-top:12px">
+      <span style="color:var(--orange)">📦 Release v0.1.1</span><br>
+      <span style="color:var(--text3)">├── 📋 Release notes (changelog)</span><br>
+      <span style="color:var(--text3)">└── 📎 Assets</span><br>
+      <span style="color:var(--text3)">      ├── projeto.zip</span> <span style="color:var(--text3);font-size:11px">← automático</span><br>
+      <span style="color:var(--text3)">      ├── projeto.tar.gz</span> <span style="color:var(--text3);font-size:11px">← automático</span><br>
+      <span style="color:var(--green)">      └── app.exe</span> <span style="color:var(--text3);font-size:11px">← você adiciona (opcional)</span>
+    </div>
+  </div>
+</div>
+
+<!-- CHERRY-PICK & BLAME -->
+<div id="avancado" class="section">
+  <h2>Cherry-pick & Blame</h2>
+  <p class="section-desc">Selecione commits específicos entre branches e rastreie quem alterou cada linha.</p>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon">🍒</div><div><div class="card-title">git cherry-pick</div><div class="card-subtitle">Copiar um commit de outra branch</div></div></div>
+    <div class="concept"><strong>Quando usar:</strong> duas branches precisam da mesma alteração, mas você não quer fazer merge de tudo — só daquele commit específico.</div>
+    <div class="diagram">
+branch2:  A ── <span class="commit">B(alteração)</span> ── C
+branch1:  A ── <span class="branch-feat">B'</span>  <span class="label">← cópia do commit B aplicada aqui!</span>
+
+<span class="label">O cherry-pick cria um NOVO commit — não move o original.</span></div>
+    <div class="code-block" id="cb10">
+<button class="copy-btn" onclick="copyCode('cb10',this)">copiar</button>
+<span class="comment"># 1. Ver commits de outra branch</span>
+<span class="cmd">git log</span> <span class="arg">funcionalidade2</span> <span class="flag">--oneline</span>
+
+<span class="comment"># 2. Estando na branch destino, aplicar o commit</span>
+<span class="cmd">git cherry-pick</span> <span class="arg">609bc79b23305a1db</span>
+
+<span class="comment"># 3. Enviar ambas as branches</span>
+<span class="cmd">git push origin</span> <span class="arg">branch1</span> <span class="arg">branch2</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon">🔍</div><div><div class="card-title">git blame</div><div class="card-subtitle">Quem alterou cada linha?</div></div></div>
+    <div class="warning"><strong>⚠️ Atenção ao mau uso:</strong> o nome "blame" significa "culpar". Use essa ferramenta para <strong>entender o código</strong> e saber com quem conversar — não para apontar culpados por bugs.</div>
+    <div class="code-block" id="cb11">
+<button class="copy-btn" onclick="copyCode('cb11',this)">copiar</button>
+<span class="comment"># Ver quem alterou cada linha</span>
+<span class="cmd">git blame</span> <span class="arg">index.html</span>
+
+<span class="comment"># Inspecionar o commit encontrado</span>
+<span class="cmd">git show</span> <span class="arg">250c665</span></div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--r8);padding:12px 14px;font-size:11.5px;font-family:'JetBrains Mono',monospace;line-height:2;margin-top:12px;overflow-x:auto">
+      <span style="color:var(--text3)">^250c665</span> <span style="color:var(--purple)">(Rodrigo  2023-09-05</span>  <span style="color:var(--blue)">1)</span> <span style="color:var(--text)">&lt;!DOCTYPE html&gt;</span><br>
+      <span style="color:var(--text3)">609bc79b</span> <span style="color:var(--purple)">(Vinicius  2023-12-23</span>  <span style="color:var(--blue)">14)</span> <span style="color:var(--text)">&lt;title&gt;</span><br>
+      <span style="color:var(--text3);font-size:10px">↑ hash    ↑ autor    ↑ data    ↑ linha    ↑ conteúdo</span>
+    </div>
+    <div class="concept" style="margin-top:12px">💡 O <strong>^</strong> antes do hash indica o <strong>primeiro commit</strong> do projeto (commit original).</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon">🛠️</div><div><div class="card-title">GitLens — blame no VS Code</div></div></div>
+    <a class="resource-link" href="https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens" target="_blank">
+      <span class="link-icon">🔗</span>
+      <div class="link-text">GitLens<div class="link-sub">Exibe autor e data ao lado de cada linha diretamente no editor</div></div>
+      <span class="arrow">↗</span>
+    </a>
+  </div>
+</div>
+
+<!-- REFERÊNCIA RÁPIDA -->
+<div id="referencia" class="section">
+  <h2>Referência Rápida</h2>
+  <p class="section-desc">Todos os comandos do curso em um só lugar.</p>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon">⚡</div><div><div class="card-title">Fluxo básico</div></div></div>
+    <table>
+      <tr><th>Comando</th><th>O que faz</th></tr>
+      <tr><td>git status</td><td>Ver o que foi modificado</td></tr>
+      <tr><td>git add .</td><td>Adicionar tudo ao stage</td></tr>
+      <tr><td>git add arquivo</td><td>Adicionar arquivo específico</td></tr>
+      <tr><td>git commit -m "msg"</td><td>Registrar as alterações</td></tr>
+      <tr><td>git push origin main</td><td>Enviar para o GitHub</td></tr>
+      <tr><td>git log --oneline</td><td>Histórico resumido</td></tr>
+      <tr><td>git show &lt;hash&gt;</td><td>Detalhes de um commit</td></tr>
+      <tr><td>git diff</td><td>Ver mudanças não adicionadas</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon">🌿</div><div><div class="card-title">Branches</div></div></div>
+    <table>
+      <tr><th>Comando</th><th>O que faz</th></tr>
+      <tr><td>git branch</td><td>Listar branches</td></tr>
+      <tr><td>git switch -c nome</td><td>Criar e entrar em nova branch</td></tr>
+      <tr><td>git switch nome</td><td>Entrar em branch existente</td></tr>
+      <tr><td>git switch -</td><td>Voltar para branch anterior</td></tr>
+      <tr><td>git merge nome</td><td>Trazer commits para branch atual</td></tr>
+      <tr><td>git branch -d nome</td><td>Deletar branch (após merge)</td></tr>
+    </table>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-header"><div class="card-icon">⏪</div><div><div class="card-title">Restore & Stash</div></div></div>
+      <table>
+        <tr><th>Comando</th><th>O que faz</th></tr>
+        <tr><td>git restore .</td><td>Desfaz todas as mudanças</td></tr>
+        <tr><td>git restore --staged</td><td>Tira do stage</td></tr>
+        <tr><td>git restore --source=HASH</td><td>Viagem no tempo</td></tr>
+        <tr><td>git stash</td><td>Guarda na gaveta</td></tr>
+        <tr><td>git stash pop</td><td>Recupera e remove</td></tr>
+        <tr><td>git stash apply N</td><td>Aplica item N</td></tr>
+        <tr><td>git stash clear</td><td>Limpa tudo</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-icon">🏷️</div><div><div class="card-title">Tags & Cherry-pick</div></div></div>
+      <table>
+        <tr><th>Comando</th><th>O que faz</th></tr>
+        <tr><td>git tag v1.0.0</td><td>Cria tag simples</td></tr>
+        <tr><td>git tag v1.0.0 -m "msg"</td><td>Cria annotated tag</td></tr>
+        <tr><td>git tag -d v1.0.0</td><td>Apaga tag local</td></tr>
+        <tr><td>git push origin --tags</td><td>Envia todas as tags</td></tr>
+        <tr><td>git cherry-pick &lt;hash&gt;</td><td>Copia commit de outra branch</td></tr>
+        <tr><td>git blame arquivo</td><td>Autoria de cada linha</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon">📚</div><div><div class="card-title">Recursos</div></div></div>
+    <a class="resource-link" href="https://git-school.github.io/visualizing-git/" target="_blank">
+      <span class="link-icon">🎮</span>
+      <div class="link-text">Visualizing Git<div class="link-sub">Playground visual — veja branches e commits graficamente</div></div>
+      <span class="arrow">↗</span>
+    </a>
+    <a class="resource-link" href="https://git-scm.com/doc" target="_blank">
+      <span class="link-icon">📖</span>
+      <div class="link-text">Documentação oficial Git<div class="link-sub">Referência completa de todos os comandos</div></div>
+      <span class="arrow">↗</span>
+    </a>
+    <a class="resource-link" href="https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens" target="_blank">
+      <span class="link-icon">🔧</span>
+      <div class="link-text">GitLens para VS Code<div class="link-sub">Git blame e histórico direto no editor</div></div>
+      <span class="arrow">↗</span>
+    </a>
+  </div>
+</div>
+
+</main>
+
+<script>
+function show(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function copyCode(id, btn) {
+  const block = document.getElementById(id);
+  const text = block.innerText.replace('copiar','').replace('copiado!','').trim();
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'copiado!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'copiar'; btn.classList.remove('copied'); }, 1800);
+  });
+}
+</script>
+</body>
+</html>
